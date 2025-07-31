@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Livestock Tycoon</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      padding: 20px;
+      background-color: #f4f4f4;
+    }
+    h1 {
+      color: #2c3e50;
+    }
+    .section {
+      background: white;
+      padding: 15px;
+      margin-bottom: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    button {
+      margin-top: 10px;
+      padding: 10px;
+      border: none;
+      border-radius: 6px;
+      background: #3498db;
+      color: white;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #2980b9;
+    }
+    select, input[type=text] {
+      padding: 8px;
+      margin-top: 5px;
+      width: 100%;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 8px;
+      text-align: center;
+    }
+    th {
+      background-color: #eaeaea;
+    }
+  </style>
+</head>
+<body>
+  <h1>Livestock Tycoon</h1>
+
+  <div class="section">
+    <label>Student Name:</label>
+    <input type="text" id="studentName">
+  </div>
+
+  <div class="section">
+    <label>Choose an Animal:</label>
+    <select id="animal">
+      <option value="pig">Pig ($150)</option>
+      <option value="steer">Steer ($300)</option>
+      <option value="lamb">Lamb ($100)</option>
+    </select>
+
+    <label>Choose Feed:</label>
+    <select id="feed">
+      <option value="cheap">Cheap Feed ($20, low quality)</option>
+      <option value="balanced">Balanced Feed ($40, medium quality)</option>
+      <option value="premium">Premium Feed ($70, high quality)</option>
+    </select>
+
+    <label>Choose a Buyer:</label>
+    <select id="buyer">
+      <option value="auction">Auction House (variable)</option>
+      <option value="packer">Packer (stable)</option>
+      <option value="direct">Direct-to-Consumer (high for quality)</option>
+    </select>
+
+    <button onclick="playGame()">Finish Round</button>
+  </div>
+
+  <div class="section">
+    <h2>Results:</h2>
+    <p id="result"></p>
+  </div>
+
+  <div class="section">
+    <h2>Leaderboard</h2>
+    <table id="leaderboard">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Animal</th>
+          <th>Feed</th>
+          <th>Buyer</th>
+          <th>Profit</th>
+        </tr>
+      </thead>
+      <tbody>
+      </tbody>
+    </table>
+  </div>
+
+  <script>
+    const animalData = {
+      pig: { cost: 150, basePrice: 300 },
+      steer: { cost: 300, basePrice: 600 },
+      lamb: { cost: 100, basePrice: 200 },
+    };
+
+    const feedEffect = {
+      cheap: { cost: 20, modifier: 0.8 },
+      balanced: { cost: 40, modifier: 1.0 },
+      premium: { cost: 70, modifier: 1.2 },
+    };
+
+    const buyerEffect = {
+      auction: () => 0.8 + Math.random() * 0.6, // 0.8–1.4
+      packer: () => 1.0,                        // stable
+      direct: () => 1.5,                        // only works well with good feed
+    };
+
+    function playGame() {
+      const name = document.getElementById('studentName').value;
+      const animal = document.getElementById('animal').value;
+      const feed = document.getElementById('feed').value;
+      const buyer = document.getElementById('buyer').value;
+
+      if (!name) {
+        alert("Please enter your name.");
+        return;
+      }
+
+      const aData = animalData[animal];
+      const fData = feedEffect[feed];
+      const buyerMultiplier = buyerEffect[buyer]();
+
+      let quality = aData.basePrice * fData.modifier;
+
+      // penalty for bad feed with direct-to-consumer
+      if (buyer === "direct" && fData.modifier < 1) {
+        quality *= 0.7;
+      }
+
+      const revenue = quality * buyerMultiplier;
+      const cost = aData.cost + fData.cost;
+      const profit = Math.round(revenue - cost);
+
+      document.getElementById('result').innerText = `You made $${Math.round(revenue)} in sales, spent $${cost}, and your profit is $${profit}.`;
+
+      const tbody = document.querySelector('#leaderboard tbody');
+      const row = document.createElement('tr');
+      row.innerHTML = `<td>${name}</td><td>${animal}</td><td>${feed}</td><td>${buyer}</td><td>$${profit}</td>`;
+      tbody.appendChild(row);
+    }
+  </script>
+</body>
+</html>
